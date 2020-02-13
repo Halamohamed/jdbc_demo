@@ -36,6 +36,8 @@ public class PersonDaoJDBC {
             "SELECT * FROM person WHERE email = ?";
     private static final String FIND_BY_LASTNAME =
             "SELECT * FROM person WHERE lastname = ?";
+    private static final String FIND_BY_BIRTHDATE =
+            "SELECT * FROM person WHERE birthdate = ?";
 
     public Person create(Person person){
         Connection connection= null;
@@ -145,8 +147,9 @@ public class PersonDaoJDBC {
         Optional<Person> optional = Optional.empty();
         try (
                 Connection connection = getConnection();
-                PreparedStatement statement = connection.prepareStatement(FIND_BY_EMAIL);
-                ResultSet resultSet = statement.executeQuery()
+                PreparedStatement statement = create_findByEmail(connection,email);
+                ResultSet resultSet = statement.executeQuery();
+
         ){
             while (resultSet.next()){
                 optional = Optional.of(new Person(resultSet.getInt("person_id"),
@@ -163,11 +166,17 @@ public class PersonDaoJDBC {
         return optional;
     }
 
+    private PreparedStatement create_findByEmail(Connection connection, String email) throws SQLException {
+        PreparedStatement statement = connection.prepareStatement(FIND_BY_EMAIL);
+        statement.setString(1,email);
+        return statement;
+    }
+
     public List<Person> findByLastName(String lastName){
         List<Person> people = new ArrayList<>();
         try(
                Connection connection = getConnection();
-               PreparedStatement statement = connection.prepareStatement(FIND_BY_LASTNAME);
+               PreparedStatement statement = create_findByLastName(connection,lastName);
                ResultSet resultSet = statement.executeQuery()
                 ){
             while (resultSet.next()){
@@ -182,5 +191,38 @@ public class PersonDaoJDBC {
             e.printStackTrace();
         }
         return people;
+    }
+
+    private PreparedStatement create_findByLastName(Connection connection, String lastName) throws SQLException {
+        PreparedStatement statement= connection.prepareStatement(FIND_BY_LASTNAME);
+        statement.setString(1,lastName);
+        return statement;
+    }
+
+    public List<Person> findByBirthDate(LocalDate birthDate){
+        List<Person> people = new ArrayList<>();
+        try (Connection connection = getConnection();
+             PreparedStatement statement = create_findByBirthDate(connection,birthDate);
+             ResultSet resultSet = statement.executeQuery()
+        ){
+            while (resultSet.next()){
+                people.add(
+                        new Person(resultSet.getInt("person_id"),
+                        resultSet.getString("firstname"),
+                        resultSet.getString("lastname"),
+                        resultSet.getString("email"),
+                        resultSet.getObject("birthdate",LocalDate.class)
+                        ));
+            }
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+        return people;
+    }
+
+    private PreparedStatement create_findByBirthDate(Connection connection, LocalDate birthDate) throws SQLException {
+        PreparedStatement statement = connection.prepareStatement(FIND_BY_BIRTHDATE);
+        statement.setObject(1,birthDate);
+        return statement;
     }
 }

@@ -20,10 +20,18 @@ public class App
         //System.out.println(dao.findById(1));
         Person person = dao.findById(1).get();
         person.setBirthDate(LocalDate.parse("1986-12-24"));
+        //System.out.println(dao.create(new Person("Imtinan","Mohammed","imtinan@gmail.com",LocalDate.parse("2000-01-01"))));
         //System.out.println(dao.updatePerson(person));
         //System.out.println(dao.deletePerson(2));
-        Person person1 = new Person("Sima", "Ahmadi","sima@gmail.com",LocalDate.parse("1998-01-01"));
-        System.out.println(dao.create(person1));
+
+        //find by email:
+        //System.out.println(dao.findByEmail("hala@gmail.com"));
+
+        //find by lastName:
+       // dao.findByLastName("Negash").forEach(System.out::println);
+
+        //find by birthDate
+        dao.findByBirthDate(LocalDate.parse("1999-12-31")).forEach(System.out::println);
 
     }
 }
